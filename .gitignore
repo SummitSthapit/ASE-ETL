@@ -1,0 +1,19 @@
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Local source data
+data/raw/*
+!data/raw/.gitkeep
+
+# Temporary files
+*.log
+.DS_Store
+Thumbs.db

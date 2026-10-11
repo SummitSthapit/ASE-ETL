@@ -1,0 +1,246 @@
+{
+    "filename": "employee_202510161125.csv",
+    "row_count": 50,
+    "column_count": 34,
+    "columns": [
+        {
+            "name": "client_employee_id",
+            "loaded_dtype": "str",
+            "null_count": 0,
+            "distinct_count": 50,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "first_name",
+            "loaded_dtype": "str",
+            "null_count": 0,
+            "distinct_count": 50,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "middle_name",
+            "loaded_dtype": "str",
+            "null_count": 50,
+            "distinct_count": 0,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "last_name",
+            "loaded_dtype": "str",
+            "null_count": 0,
+            "distinct_count": 1,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "preferred_name",
+            "loaded_dtype": "str",
+            "null_count": 0,
+            "distinct_count": 50,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "job_code",
+            "loaded_dtype": "str",
+            "null_count": 0,
+            "distinct_count": 36,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "job_title",
+            "loaded_dtype": "str",
+            "null_count": 0,
+            "distinct_count": 36,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "job_start_date",
+            "loaded_dtype": "str",
+            "null_count": 0,
+            "distinct_count": 48,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "organization_id",
+            "loaded_dtype": "str",
+            "null_count": 0,
+            "distinct_count": 3,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "organization_name",
+            "loaded_dtype": "str",
+            "null_count": 0,
+            "distinct_count": 3,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "department_id",
+            "loaded_dtype": "str",
+            "null_count": 0,
+            "distinct_count": 38,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "department_name",
+            "loaded_dtype": "str",
+            "null_count": 0,
+            "distinct_count": 38,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "dob",
+            "loaded_dtype": "str",
+            "null_count": 0,
+            "distinct_count": 50,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "hire_date",
+            "loaded_dtype": "str",
+            "null_count": 0,
+            "distinct_count": 48,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "recent_hire_date",
+            "loaded_dtype": "str",
+            "null_count": 0,
+            "distinct_count": 48,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "anniversary_date",
+            "loaded_dtype": "str",
+            "null_count": 0,
+            "distinct_count": 49,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "term_date",
+            "loaded_dtype": "str",
+            "null_count": 44,
+            "distinct_count": 6,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "years_of_experience",
+            "loaded_dtype": "str",
+            "null_count": 50,
+            "distinct_count": 0,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "work_email",
+            "loaded_dtype": "str",
+            "null_count": 0,
+            "distinct_count": 50,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "address",
+            "loaded_dtype": "str",
+            "null_count": 0,
+            "distinct_count": 1,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "city",
+            "loaded_dtype": "str",
+            "null_count": 0,
+            "distinct_count": 1,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "state",
+            "loaded_dtype": "str",
+            "null_count": 0,
+            "distinct_count": 1,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "zip",
+            "loaded_dtype": "str",
+            "null_count": 50,
+            "distinct_count": 0,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "country",
+            "loaded_dtype": "str",
+            "null_count": 0,
+            "distinct_count": 1,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "manager_employee_id",
+            "loaded_dtype": "str",
+            "null_count": 0,
+            "distinct_count": 28,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "manager_employee_name",
+            "loaded_dtype": "str",
+            "null_count": 50,
+            "distinct_count": 0,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "fte_status",
+            "loaded_dtype": "str",
+            "null_count": 0,
+            "distinct_count": 3,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "is_per_deim",
+            "loaded_dtype": "str",
+            "null_count": 50,
+            "distinct_count": 0,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "cell_phone",
+            "loaded_dtype": "str",
+            "null_count": 0,
+            "distinct_count": 5,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "work_phone",
+            "loaded_dtype": "str",
+            "null_count": 50,
+            "distinct_count": 0,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "scheduled_weekly_hour",
+            "loaded_dtype": "str",
+            "null_count": 0,
+            "distinct_count": 1,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "active_status",
+            "loaded_dtype": "str",
+            "null_count": 0,
+            "distinct_count": 2,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "termination_reason",
+            "loaded_dtype": "str",
+            "null_count": 44,
+            "distinct_count": 2,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "clinical_level",
+            "loaded_dtype": "str",
+            "null_count": 50,
+            "distinct_count": 0,
+            "exact_duplicate_rows_involving_value": null
+        }
+    ],
+    "exact_duplicate_rows": 0
+}

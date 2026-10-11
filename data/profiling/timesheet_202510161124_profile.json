@@ -1,0 +1,106 @@
+{
+    "filename": "timesheet_202510161124.csv",
+    "row_count": 38957,
+    "column_count": 14,
+    "columns": [
+        {
+            "name": "client_employee_id",
+            "loaded_dtype": "str",
+            "null_count": 0,
+            "distinct_count": 6411,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "department_id",
+            "loaded_dtype": "str",
+            "null_count": 38957,
+            "distinct_count": 0,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "department_name",
+            "loaded_dtype": "str",
+            "null_count": 38956,
+            "distinct_count": 1,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "home_department_id",
+            "loaded_dtype": "str",
+            "null_count": 38957,
+            "distinct_count": 0,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "home_department_name",
+            "loaded_dtype": "str",
+            "null_count": 38957,
+            "distinct_count": 0,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "pay_code",
+            "loaded_dtype": "str",
+            "null_count": 0,
+            "distinct_count": 61,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "punch_in_comment",
+            "loaded_dtype": "str",
+            "null_count": 0,
+            "distinct_count": 1,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "punch_out_comment",
+            "loaded_dtype": "str",
+            "null_count": 0,
+            "distinct_count": 2,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "hours_worked",
+            "loaded_dtype": "str",
+            "null_count": 0,
+            "distinct_count": 80,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "punch_apply_date",
+            "loaded_dtype": "str",
+            "null_count": 0,
+            "distinct_count": 13,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "punch_in_datetime",
+            "loaded_dtype": "str",
+            "null_count": 0,
+            "distinct_count": 711,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "punch_out_datetime",
+            "loaded_dtype": "str",
+            "null_count": 0,
+            "distinct_count": 749,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "scheduled_start_datetime",
+            "loaded_dtype": "str",
+            "null_count": 38957,
+            "distinct_count": 0,
+            "exact_duplicate_rows_involving_value": null
+        },
+        {
+            "name": "scheduled_end_datetime",
+            "loaded_dtype": "str",
+            "null_count": 38957,
+            "distinct_count": 0,
+            "exact_duplicate_rows_involving_value": null
+        }
+    ],
+    "exact_duplicate_rows": 0
+}
