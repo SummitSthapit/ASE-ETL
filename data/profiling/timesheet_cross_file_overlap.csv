@@ -1,0 +1,7 @@
+file_a,file_b,rows_in_file_a,rows_in_file_b,shared_candidate_keys
+timesheet_202509151540.csv,timesheet_202510161121.csv,269921,48258,0
+timesheet_202509151540.csv,timesheet_202510161122.csv,269921,55435,0
+timesheet_202509151540.csv,timesheet_202510161124.csv,269921,38957,0
+timesheet_202510161121.csv,timesheet_202510161122.csv,48258,55435,23892
+timesheet_202510161121.csv,timesheet_202510161124.csv,48258,38957,0
+timesheet_202510161122.csv,timesheet_202510161124.csv,55435,38957,6947

@@ -1,0 +1,68 @@
+source_file,pay_code,direction,affected_rows,median_difference_hours,maximum_absolute_difference_hours
+timesheet_202509151540.csv,normal_worked,Recorded hours lower,515,-0.6366666666666676,2.213333333333333
+timesheet_202509151540.csv,Hourly,Recorded hours lower,17,-0.5033333333333339,1.2533333333333339
+timesheet_202509151540.csv,TM-10 OT 50HP|TM-Called-in RN 50,Recorded hours lower,9,-0.4833333333333325,0.9466666666666672
+timesheet_202509151540.csv,normal_worked|TM-On Call Non Union,Recorded hours lower,9,-0.6833333333333336,1.5500000000000007
+timesheet_202509151540.csv,HH-Meeting|normal_worked,Recorded hours lower,8,-0.47500000000000053,1.0033333333333339
+timesheet_202509151540.csv,DNU_Hourly Call Back|Hourly,Recorded hours lower,5,-0.46999999999999886,1.1000000000000014
+timesheet_202509151540.csv,normal_worked|TM-On Call RN,Recorded hours lower,5,-0.6166666666666671,1.2333333333333325
+timesheet_202509151540.csv,HH OnCall NonUnion|normal_worked,Recorded hours lower,4,-0.876666666666666,1.0466666666666669
+timesheet_202509151540.csv,TM-On Call Non Union,Recorded hours lower,4,-1.105,1.2366666666666664
+timesheet_202509151540.csv,HH OnCall Union,Recorded hours lower,3,-0.8633333333333333,1.1533333333333333
+timesheet_202509151540.csv,Per Diem,Recorded hours lower,3,-0.5700000000000003,1.1833333333333336
+timesheet_202509151540.csv,normal_worked|TM-Temp Reassign NU Meal TS NU,Recorded hours lower,3,-0.4299999999999997,0.43333333333333357
+timesheet_202509151540.csv,HH-Hourly|HH-Union DOT 12 No Min,Recorded hours lower,2,-0.45999999999999996,0.5
+timesheet_202509151540.csv,Hourly|Hourly On Call,Recorded hours lower,2,-0.9666666666666668,1.0
+timesheet_202509151540.csv,Hourly|Perm Evening,Recorded hours lower,2,-0.8433333333333346,0.8499999999999996
+timesheet_202509151540.csv,TM-10 OT 50HP|TM-On Call RN,Recorded hours lower,2,-1.0683333333333325,1.253333333333332
+timesheet_202509151540.csv,TM-Called-in RN 50,Recorded hours lower,2,-0.8450000000000006,0.953333333333334
+timesheet_202509151540.csv,normal_worked|TM-Education Non Union,Recorded hours lower,2,-0.5283333333333333,0.5700000000000003
+timesheet_202509151540.csv,DNU_Hourly Call Back|MNA 10 50HP,Recorded hours lower,1,-0.5033333333333339,0.5033333333333339
+timesheet_202509151540.csv,DNU_Hourly Call Back|Per Diem|Wrong Function Key,Recorded hours lower,1,-0.33333333333333304,0.33333333333333304
+timesheet_202509151540.csv,HH OnCall NonUnion,Recorded hours lower,1,-0.6699999999999999,0.6699999999999999
+timesheet_202509151540.csv,HH-Hourly|normal_worked,Recorded hours lower,1,-0.4800000000000004,0.4800000000000004
+timesheet_202509151540.csv,HH-Nursing|normal_worked,Recorded hours lower,1,-0.5166666666666657,0.5166666666666657
+timesheet_202509151540.csv,HH-Union DOT 12 No Min|normal_worked,Recorded hours lower,1,-1.1866666666666656,1.1866666666666656
+timesheet_202509151540.csv,Hourly On Call,Recorded hours lower,1,-1.0,1.0
+timesheet_202509151540.csv,MNA 8 50HP PermNite|Perm Nite,Recorded hours lower,1,-0.5,0.5
+timesheet_202509151540.csv,Perm Weekend Day|Perm Weekend Eve,Recorded hours lower,1,-1.25,1.25
+timesheet_202509151540.csv,TM-12 OT 50HP,Recorded hours lower,1,-0.4966666666666679,0.4966666666666679
+timesheet_202509151540.csv,TM-12 OT 50HP NU|TM-On Call RN,Recorded hours lower,1,-0.716666666666665,0.716666666666665
+timesheet_202509151540.csv,TM-Called-in RN 50|TM-Float 10 OT 50HP,Recorded hours lower,1,-0.2699999999999996,0.2699999999999996
+timesheet_202509151540.csv,TM-Edu12 indirect|TM-Mtg8 indirect,Recorded hours lower,1,-0.5,0.5
+timesheet_202509151540.csv,TM-Edu8 indirect|TM-Mtg8 indirect,Recorded hours lower,1,-1.0033333333333334,1.0033333333333334
+timesheet_202509151540.csv,TM-Education Non Union NU|TM-Orientation Non Union,Recorded hours lower,1,-0.5,0.5
+timesheet_202509151540.csv,normal_worked|TM-10 OT 50HP,Recorded hours lower,1,-0.33333333333333215,0.33333333333333215
+timesheet_202509151540.csv,normal_worked|TM-12 OT 50HP,Recorded hours lower,1,-0.7033333333333367,0.7033333333333367
+timesheet_202509151540.csv,normal_worked|TM-Edu8 indirect|TM-On Call RN,Recorded hours lower,1,-0.9966666666666661,0.9966666666666661
+timesheet_202510161121.csv,Hourly,Recorded hours lower,151,-0.5133333333333336,1.2366666666666664
+timesheet_202510161121.csv,DNU_Hourly Call Back|Hourly,Recorded hours lower,27,-0.5,1.1966666666666654
+timesheet_202510161121.csv,Per Diem,Recorded hours lower,10,-0.5766666666666671,1.086666666666666
+timesheet_202510161121.csv,Hourly|Perm Evening,Recorded hours lower,4,-0.5099999999999998,1.25
+timesheet_202510161121.csv,DNU_Hourly Call Back|Hourly On Call,Recorded hours lower,2,-0.748333333333334,0.7833333333333332
+timesheet_202510161121.csv,DNU_Hourly Call Back|Hourly|Hourly On Call,Recorded hours lower,2,-0.7183333333333328,1.0033333333333339
+timesheet_202510161121.csv,DNU_Hourly Call Back|MNA 10 50HP,Recorded hours lower,2,-0.4666666666666668,0.5033333333333339
+timesheet_202510161121.csv,DNU_Hourly Call Back|MNA 8 50HP,Recorded hours lower,2,-0.7316666666666674,1.0
+timesheet_202510161121.csv,DNU_Hourly Call Back,Recorded hours lower,1,-0.5,0.5
+timesheet_202510161121.csv,DNU_Hourly Call Back|MNA 50HP Call|MNA 8 50HP,Recorded hours lower,1,-1.1500000000000004,1.1500000000000004
+timesheet_202510161121.csv,DNU_Hourly Call Back|Per Diem,Recorded hours lower,1,-0.6833333333333353,0.6833333333333353
+timesheet_202510161121.csv,Hourly Mtg,Recorded hours lower,1,-0.8300000000000001,0.8300000000000001
+timesheet_202510161121.csv,Hourly Mtg|Per Diem,Recorded hours lower,1,-0.5133333333333336,0.5133333333333336
+timesheet_202510161121.csv,Hourly On Call,Recorded hours lower,1,-1.0,1.0
+timesheet_202510161121.csv,Hourly On Call|MNA 10 50HP,Recorded hours lower,1,-0.46333333333333293,0.46333333333333293
+timesheet_202510161121.csv,Hourly|Hourly Edu,Recorded hours lower,1,-0.6333333333333329,0.6333333333333329
+timesheet_202510161121.csv,Hourly|Hourly Mtg,Recorded hours lower,1,-0.7166666666666668,0.7166666666666668
+timesheet_202510161121.csv,MNA 8 50HP,Recorded hours lower,1,-1.1666666666666665,1.1666666666666665
+timesheet_202510161122.csv,Hourly,Recorded hours lower,77,-0.5966666666666676,1.2366666666666664
+timesheet_202510161122.csv,DNU_Hourly Call Back|Hourly,Recorded hours lower,20,-0.5,1.0
+timesheet_202510161122.csv,DNU_Hourly Call Back|MNA 10 50HP,Recorded hours lower,3,-0.5,0.5033333333333339
+timesheet_202510161122.csv,DNU_Hourly Call Back|MNA 8 50HP,Recorded hours lower,3,-1.0,1.0
+timesheet_202510161122.csv,Exempt,Recorded hours lower,2,-0.7599999999999998,1.0
+timesheet_202510161122.csv,Per Diem,Recorded hours lower,2,-0.7116666666666673,0.8033333333333337
+timesheet_202510161122.csv,DNU_Hourly Call Back|Hourly|Hourly On Call,Recorded hours lower,1,-1.0033333333333339,1.0033333333333339
+timesheet_202510161122.csv,Hourly On Call|MNA 10 50HP,Recorded hours lower,1,-0.46333333333333293,0.46333333333333293
+timesheet_202510161124.csv,Hourly,Recorded hours lower,21,-1.0,1.0
+timesheet_202510161124.csv,DNU_Hourly Call Back|Hourly,Recorded hours lower,7,-1.0,1.0
+timesheet_202510161124.csv,DNU_Hourly Call Back|MNA 8 50HP,Recorded hours lower,2,-1.0,1.0
+timesheet_202510161124.csv,Exempt,Recorded hours lower,2,-0.5199999999999996,0.5199999999999996
+timesheet_202510161124.csv,DNU_Hourly Call Back|MNA 10 50HP,Recorded hours lower,1,-0.5,0.5

@@ -1,0 +1,5 @@
+filename,total_rows,invalid_punch_in,invalid_punch_out,missing_or_non_numeric_hours,negative_recorded_hours,zero_recorded_hours,negative_elapsed_intervals,zero_elapsed_intervals,rows_comparable,difference_within_0_01_hours,difference_over_0_25_hours,difference_over_1_hour,median_absolute_difference_hours,maximum_absolute_difference_hours
+timesheet_202509151540.csv,269921,0,0,0,0,0,0,0,269921,267948,615,133,0.003333333333332078,2.213333333333333
+timesheet_202510161121.csv,48258,0,0,0,0,0,0,0,48258,47845,210,21,0.0,1.25
+timesheet_202510161122.csv,55435,0,0,0,0,0,0,0,55435,55266,109,9,0.0,1.2366666666666664
+timesheet_202510161124.csv,38957,0,0,0,0,0,0,0,38957,38922,33,0,0.0,1.0

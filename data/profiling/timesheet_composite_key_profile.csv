@@ -1,0 +1,17 @@
+filename,candidate_key,columns,total_rows,rows_with_complete_key,rows_with_incomplete_key,distinct_complete_combinations,rows_in_duplicate_key_groups
+timesheet_202509151540.csv,employee_punch_in_out,client_employee_id + punch_in_datetime + punch_out_datetime,269921,269921,0,269921,0
+timesheet_202509151540.csv,employee_date_pay_code,client_employee_id + punch_apply_date + pay_code,269921,269921,0,268660,2509
+timesheet_202509151540.csv,employee_punch_in_out_pay_code,client_employee_id + punch_in_datetime + punch_out_datetime + pay_code,269921,269921,0,269921,0
+timesheet_202509151540.csv,employee_department_punch_in_out_pay_code,client_employee_id + department_id + punch_in_datetime + punch_out_datetime + pay_code,269921,222006,47915,222006,0
+timesheet_202510161121.csv,employee_punch_in_out,client_employee_id + punch_in_datetime + punch_out_datetime,48258,48258,0,48258,0
+timesheet_202510161121.csv,employee_date_pay_code,client_employee_id + punch_apply_date + pay_code,48258,48258,0,48072,367
+timesheet_202510161121.csv,employee_punch_in_out_pay_code,client_employee_id + punch_in_datetime + punch_out_datetime + pay_code,48258,48258,0,48258,0
+timesheet_202510161121.csv,employee_department_punch_in_out_pay_code,client_employee_id + department_id + punch_in_datetime + punch_out_datetime + pay_code,48258,24388,23870,24388,0
+timesheet_202510161122.csv,employee_punch_in_out,client_employee_id + punch_in_datetime + punch_out_datetime,55435,55435,0,55435,0
+timesheet_202510161122.csv,employee_date_pay_code,client_employee_id + punch_apply_date + pay_code,55435,55435,0,55337,195
+timesheet_202510161122.csv,employee_punch_in_out_pay_code,client_employee_id + punch_in_datetime + punch_out_datetime + pay_code,55435,55435,0,55435,0
+timesheet_202510161122.csv,employee_department_punch_in_out_pay_code,client_employee_id + department_id + punch_in_datetime + punch_out_datetime + pay_code,55435,8994,46441,8994,0
+timesheet_202510161124.csv,employee_punch_in_out,client_employee_id + punch_in_datetime + punch_out_datetime,38957,38957,0,38957,0
+timesheet_202510161124.csv,employee_date_pay_code,client_employee_id + punch_apply_date + pay_code,38957,38957,0,38927,60
+timesheet_202510161124.csv,employee_punch_in_out_pay_code,client_employee_id + punch_in_datetime + punch_out_datetime + pay_code,38957,38957,0,38957,0
+timesheet_202510161124.csv,employee_department_punch_in_out_pay_code,client_employee_id + department_id + punch_in_datetime + punch_out_datetime + pay_code,38957,0,38957,0,0
