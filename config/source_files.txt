@@ -1,0 +1,6 @@
+# CSV files included in the ASE-ETL ingestion
+employee_202510161125.csv
+timesheet_202509151540.csv
+timesheet_202510161121.csv
+timesheet_202510161122.csv
+timesheet_202510161124.csv
