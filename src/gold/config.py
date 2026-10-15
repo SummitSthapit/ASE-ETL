@@ -1,4 +1,5 @@
 """Configuration and contracts for the Gold layer."""
+import os
 
 GOLD_SCHEMA = "gold"
 
@@ -20,3 +21,11 @@ GOLD_TABLES = [
     "dim_date",
     "fact_timesheet",
 ]
+
+GOLD_BUCKET = os.getenv("GOLD_BUCKET", "ase-gold")
+
+GOLD_DATASETS = (
+    "dim_employee",
+    "dim_date",
+    "fact_timesheet",
+)

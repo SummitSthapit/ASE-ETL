@@ -345,3 +345,63 @@ def load_fact_timesheet(connection):
         "PASS: Gold timesheet fact load executed "
         f"({result.rowcount:,} inserted/updated)"
     )
+
+def remove_stale_facts(connection):
+    """
+    Remove Gold facts that no longer exist in Silver.
+
+    Preserves surrogate keys for retained events.
+    """
+
+    result = connection.execute(
+        text("""
+            DELETE FROM gold.fact_timesheet f
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM silver.timesheets s
+                WHERE s.client_employee_id =
+                      f.client_employee_id
+                  AND s.punch_in_datetime =
+                      f.punch_in_datetime
+                  AND s.punch_out_datetime =
+                      f.punch_out_datetime
+            )
+        """)
+    )
+
+    print(
+        "Gold stale facts removed:",
+        result.rowcount,
+    )
+
+
+def remove_stale_employees(connection):
+    """
+    Remove employee identities absent from both
+    current Silver source tables.
+
+    Run only after stale facts are removed.
+    """
+
+    result = connection.execute(
+        text("""
+            DELETE FROM gold.dim_employee e
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM silver.employees s
+                WHERE s.client_employee_id =
+                      e.client_employee_id
+            )
+            AND NOT EXISTS (
+                SELECT 1
+                FROM silver.timesheets t
+                WHERE t.client_employee_id =
+                      e.client_employee_id
+            )
+        """)
+    )
+
+    print(
+        "Gold stale employees removed:",
+        result.rowcount,
+    )

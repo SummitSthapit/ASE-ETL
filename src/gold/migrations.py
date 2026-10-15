@@ -360,3 +360,64 @@ def ensure_fact_timesheet(connection):
         )
 
     print("PASS: gold.fact_timesheet schema verified")
+
+def ensure_gold_registry(connection):
+    """
+    Create and verify the Gold publication registry.
+
+    The caller manages the transaction.
+    """
+
+    ensure_gold_schema(connection)
+
+    connection.execute(
+        text("""
+            CREATE TABLE IF NOT EXISTS
+                gold._publication_registry (
+                    publication_id INTEGER PRIMARY KEY,
+
+                    silver_snapshot_fingerprint CHAR(64) NOT NULL,
+                    gold_model_version VARCHAR(20) NOT NULL,
+
+                    employee_count BIGINT NOT NULL,
+                    date_count BIGINT NOT NULL,
+                    timesheet_count BIGINT NOT NULL,
+
+                    gold_snapshot_fingerprint CHAR(64),
+                    minio_prefix TEXT,
+
+                    publication_status VARCHAR(20) NOT NULL
+                        CHECK (
+                            publication_status IN (
+                                'DB_READY',
+                                'PUBLISHED'
+                            )
+                        ),
+
+                    database_committed_at TIMESTAMPTZ NOT NULL,
+                    published_at TIMESTAMPTZ,
+
+                    CONSTRAINT chk_gold_publication_complete
+                    CHECK (
+                        publication_status <> 'PUBLISHED'
+                        OR (
+                            gold_snapshot_fingerprint IS NOT NULL
+                            AND minio_prefix IS NOT NULL
+                            AND published_at IS NOT NULL
+                        )
+                    )
+                )
+        """)
+    )
+
+    inspector = inspect(connection)
+
+    if not inspector.has_table(
+        "_publication_registry",
+        schema=GOLD_SCHEMA,
+    ):
+        raise RuntimeError(
+            "Gold publication registry was not created"
+        )
+
+    print("PASS: Gold publication registry verified")
