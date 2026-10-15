@@ -2,6 +2,16 @@
 import hashlib
 import json
 from datetime import datetime, timezone
+import pandas as pd
+
+from sqlalchemy import inspect
+
+from src.silver.schema_contract import (
+    SCHEMA_VERSION,
+    SCHEMA_COLUMNS,
+)
+
+from src.silver.migrations import migrate_employee_schema
 
 from sqlalchemy import text
 
@@ -43,20 +53,35 @@ def calculate_snapshot_fingerprint():
     return digest.hexdigest()
 
 
+
 def ensure_registry(connection):
+    """
+    Create or upgrade the publication registry.
+
+    The caller controls the transaction.
+    """
     connection.execute(
         text("""
             CREATE TABLE IF NOT EXISTS
                 silver._publication_registry (
-                publication_id INTEGER PRIMARY KEY,
-                snapshot_fingerprint CHAR(64) NOT NULL,
-                minio_prefix TEXT NOT NULL,
-                employee_count BIGINT NOT NULL,
-                timesheet_count BIGINT NOT NULL,
-                published_at TIMESTAMPTZ NOT NULL
-            )
+                    publication_id INTEGER PRIMARY KEY,
+                    snapshot_fingerprint CHAR(64) NOT NULL,
+                    minio_prefix TEXT NOT NULL,
+                    employee_count BIGINT NOT NULL,
+                    timesheet_count BIGINT NOT NULL,
+                    published_at TIMESTAMPTZ NOT NULL
+                )
         """)
     )
+
+    connection.execute(
+        text("""
+            ALTER TABLE silver._publication_registry
+            ADD COLUMN IF NOT EXISTS
+                schema_version VARCHAR(20)
+        """)
+    )
+
 
 
 def verify_database_counts(connection, counts):
@@ -134,13 +159,14 @@ def upload_snapshot(prefix, fingerprint, counts):
 
         print(f"Verified MinIO: {dataset}")
 
-    manifest = {
-        "snapshot_fingerprint": fingerprint,
-        "prefix": prefix,
-        "counts": counts,
-        "datasets": DATASETS,
-        "status": "prepared",
-    }
+        manifest = {
+            "snapshot_fingerprint": fingerprint,
+            "prefix": prefix,
+            "schema_version": SCHEMA_VERSION,
+            "counts": counts,
+            "datasets": DATASETS,
+            "status": "prepared",
+        }
 
     # This describes the uploaded snapshot.
     # PostgreSQL's registry determines which snapshot
@@ -160,10 +186,18 @@ def upload_snapshot(prefix, fingerprint, counts):
     )
 
 
+
 def publish_database(fingerprint, prefix, counts):
+    """
+    Publish Silver v2 inside one PostgreSQL transaction.
+
+    Includes schema migration, data replacement,
+    verification, and publication registry update.
+    """
     with ENGINE.begin() as connection:
-        # Prevent concurrent publisher transactions from
-        # modifying the current publication simultaneously.
+
+        # Prevent concurrent publishers from changing
+        # the active publication simultaneously.
         connection.execute(
             text("SELECT pg_advisory_xact_lock(7182401)")
         )
@@ -176,34 +210,93 @@ def publish_database(fingerprint, prefix, counts):
 
         previous = connection.execute(
             text("""
-                SELECT snapshot_fingerprint
+                SELECT
+                    snapshot_fingerprint,
+                    schema_version
                 FROM silver._publication_registry
                 WHERE publication_id = 1
             """)
-        ).scalar_one_or_none()
+        ).mappings().one_or_none()
 
-        if previous == fingerprint:
-            verify_database_counts(connection, counts)
+        # Ensure the database structure is compatible
+        # even when the fingerprint matches.
+        existing_columns = {
+            column["name"]
+            for column in inspect(connection).get_columns(
+                "employees",
+                schema="silver",
+            )
+        }
 
-            print("Snapshot already published.")
-            print("Skipping PostgreSQL reload.")
+        expected_columns = set(
+            SCHEMA_COLUMNS["employees"]
+        )
+
+        same_publication = (
+            previous is not None
+            and previous["snapshot_fingerprint"]
+                == fingerprint
+            and previous["schema_version"]
+                == SCHEMA_VERSION
+            and existing_columns == expected_columns
+        )
+
+        if same_publication:
+            # Also validate restored column types.
+            migrate_employee_schema(connection)
+
+            verify_database_counts(
+                connection, counts
+            )
+
+            print(
+                "Snapshot already published. "
+                "Skipping PostgreSQL reload."
+            )
+
             return False
 
-        # Preserve existing tables and their constraints.
-        # All deletes and inserts occur in one transaction.
+        print("\nMIGRATING EMPLOYEE SCHEMA")
+
+        added = migrate_employee_schema(
+            connection
+        )
+
+        print("Employee columns added:", len(added))
+
+        # Validate the complete employee column set.
+        migrated_columns = {
+            column["name"]
+            for column in inspect(connection).get_columns(
+                "employees",
+                schema="silver",
+            )
+        }
+
+        if migrated_columns != expected_columns:
+            raise ValueError(
+                "PostgreSQL employee columns do not "
+                "match the Silver v2 contract"
+            )
+
+        print("\nLOADING SILVER V2 DATA")
+
+        # Remove existing rows within this transaction.
+        # If any later operation fails, PostgreSQL
+        # restores the previous committed records.
         for dataset in ("timesheets", "employees"):
             connection.execute(
-                text(f"DELETE FROM silver.{dataset}")
+                text(
+                    f"DELETE FROM silver.{dataset}"
+                )
             )
 
         for dataset in ("employees", "timesheets"):
             frame = load_dataframe(dataset)
 
-            frame["ingested_at_utc"] = (
-                __import__("pandas").to_datetime(
-                    frame["ingested_at_utc"],
-                    utc=True,
-                )
+            frame["ingested_at_utc"] = pd.to_datetime(
+                frame["ingested_at_utc"],
+                utc=True,
             )
 
             frame.to_sql(
@@ -216,21 +309,63 @@ def publish_database(fingerprint, prefix, counts):
                 chunksize=5000,
             )
 
-        verify_database_counts(connection, counts)
+            print(
+                f"Loaded {dataset}: "
+                f"{len(frame):,} records"
+            )
 
+        # Confirm the inserted row counts.
+        verify_database_counts(
+            connection, counts
+        )
+
+        # Verify that PostgreSQL primary-key constraints
+        # still exist after the migration and reload.
+        inspector = inspect(connection)
+
+        employee_pk = inspector.get_pk_constraint(
+            "employees", schema="silver"
+        )["constrained_columns"]
+
+        timesheet_pk = inspector.get_pk_constraint(
+            "timesheets", schema="silver"
+        )["constrained_columns"]
+
+        if employee_pk != ["client_employee_id"]:
+            raise ValueError(
+                "Employee primary key was not preserved"
+            )
+
+        if set(timesheet_pk) != {
+            "client_employee_id",
+            "punch_in_datetime",
+            "punch_out_datetime",
+        }:
+            raise ValueError(
+                "Timesheet primary key was not preserved"
+            )
+
+        # Update the registry only after successfully
+        # loading and verifying the database tables.
         connection.execute(
             text("""
                 INSERT INTO silver._publication_registry (
                     publication_id,
                     snapshot_fingerprint,
                     minio_prefix,
+                    schema_version,
                     employee_count,
                     timesheet_count,
                     published_at
                 )
                 VALUES (
-                    1, :fingerprint, :prefix,
-                    :employees, :timesheets, :published_at
+                    1,
+                    :fingerprint,
+                    :prefix,
+                    :schema_version,
+                    :employees,
+                    :timesheets,
+                    :published_at
                 )
                 ON CONFLICT (publication_id)
                 DO UPDATE SET
@@ -238,6 +373,8 @@ def publish_database(fingerprint, prefix, counts):
                         EXCLUDED.snapshot_fingerprint,
                     minio_prefix =
                         EXCLUDED.minio_prefix,
+                    schema_version =
+                        EXCLUDED.schema_version,
                     employee_count =
                         EXCLUDED.employee_count,
                     timesheet_count =
@@ -248,6 +385,7 @@ def publish_database(fingerprint, prefix, counts):
             {
                 "fingerprint": fingerprint,
                 "prefix": prefix,
+                "schema_version": SCHEMA_VERSION,
                 "employees": counts["employees"],
                 "timesheets": counts["timesheets"],
                 "published_at": datetime.now(
@@ -256,7 +394,75 @@ def publish_database(fingerprint, prefix, counts):
             },
         )
 
+        # The context manager commits only when
+        # all operations have completed successfully.
+
     return True
+
+
+def verify_silver_v2():
+    """
+    Verify that local Silver v2 outputs exist
+    before publishing anything to MinIO or PostgreSQL.
+    """
+    counts = verify_local()
+
+    for dataset in ("employees", "timesheets"):
+        frame = load_dataframe(dataset)
+
+        expected_columns = SCHEMA_COLUMNS[dataset]
+
+        if frame.columns.tolist() != expected_columns:
+            raise ValueError(
+                f"{dataset}: local Silver schema does not "
+                f"match the approved v2 contract. "
+                f"Run the Silver v2 pipeline first."
+            )
+
+    schema_audit = load_dataframe(
+        "audit/schema_evolution"
+    )
+
+    if schema_audit.empty:
+        raise ValueError("Schema-evolution audit is empty")
+
+    if not schema_audit["schema_version"].eq(
+        SCHEMA_VERSION
+    ).all():
+        raise ValueError(
+            "Schema-evolution audit has an incompatible version"
+        )
+
+    if int(schema_audit["source_rows"].sum()) != (
+        50 + 412571
+    ):
+        raise ValueError(
+            "Schema audit does not reconcile with "
+            "the current Bronze snapshot"
+        )
+
+    # Published audits must not contain
+    # machine-specific absolute source paths.
+    from pathlib import PurePosixPath
+
+    for source in schema_audit["source_name"]:
+        if (
+            not isinstance(source, str)
+            or "\\" in source
+            or PurePosixPath(source).is_absolute()
+            or ".." in PurePosixPath(source).parts
+            or ":" in source
+        ):
+            raise ValueError(
+                "Schema audit contains a nonportable source path"
+            )
+
+    print(
+        f"PASS: Local Silver {SCHEMA_VERSION} "
+        f"publication checks"
+    )
+
+    return counts
 
 
 def main():
@@ -264,7 +470,7 @@ def main():
     print("ASE-ETL IDEMPOTENT SILVER PUBLISHER")
     print("=" * 65)
 
-    counts = verify_local()
+    counts = verify_silver_v2()
 
     fingerprint = calculate_snapshot_fingerprint()
     prefix = f"runs/{fingerprint}"

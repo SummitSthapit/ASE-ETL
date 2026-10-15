@@ -100,6 +100,42 @@ def validate_employees(
         "CRITICAL",
     )
 
+    # ----------------------------------------------
+    # Validate years_of_experience
+    # ----------------------------------------------
+
+    experience = silver["years_of_experience"]
+
+    # Detect nonmissing source values that could
+    # not be converted into numeric values.
+    raw_experience = _normalize(
+        raw["years_of_experience"]
+    )
+
+    invalid_experience = (
+        raw_experience.notna()
+        & experience.isna()
+    )
+
+    _add_issue(
+        issues,
+        silver,
+        invalid_experience,
+        "INVALID_YEARS_OF_EXPERIENCE",
+        "CRITICAL",
+    )
+
+    # Negative experience is not meaningful.
+    negative_experience = experience < 0
+
+    _add_issue(
+        issues,
+        silver,
+        negative_experience,
+        "NEGATIVE_YEARS_OF_EXPERIENCE",
+        "CRITICAL",
+    )
+
     return pd.DataFrame(
         issues,
         columns=[

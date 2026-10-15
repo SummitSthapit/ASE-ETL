@@ -29,21 +29,6 @@ MISSING_MARKERS = {
 
 # Employee schema
 
-EMPLOYEE_DROP_COLUMNS = [
-    "middle_name",
-    "years_of_experience",
-    "zip",
-    "manager_employee_name",
-    "is_per_deim",
-    "work_phone",
-    "clinical_level",
-    "address",
-    "city",
-    "state",
-    "country",
-    "cell_phone",
-]
-
 EMPLOYEE_DATE_COLUMNS = [
     "job_start_date",
     "dob",
@@ -55,6 +40,22 @@ EMPLOYEE_DATE_COLUMNS = [
 
 EMPLOYEE_NUMERIC_COLUMNS = [
     "scheduled_weekly_hour",
+    "years_of_experience",
+]
+
+# Fields where a value consisting entirely of X characters
+# represents source masking rather than a usable value.
+EMPLOYEE_FULL_MASK_COLUMNS = [
+    "address",
+    "city",
+    "state",
+    "country",
+]
+
+# Contact fields requiring separate masking treatment.
+EMPLOYEE_PHONE_COLUMNS = [
+    "cell_phone",
+    "work_phone",
 ]
 
 

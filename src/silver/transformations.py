@@ -3,9 +3,10 @@ import pandas as pd
 
 from src.silver.config import (
     MISSING_MARKERS,
-    EMPLOYEE_DROP_COLUMNS,
     EMPLOYEE_DATE_COLUMNS,
     EMPLOYEE_NUMERIC_COLUMNS,
+    EMPLOYEE_FULL_MASK_COLUMNS,
+    EMPLOYEE_PHONE_COLUMNS,
     TIMESHEET_DATE_COLUMNS,
     TIMESHEET_DATETIME_COLUMNS,
     TIMESHEET_NUMERIC_COLUMNS,
@@ -34,6 +35,48 @@ def normalize_missing_values(df: pd.DataFrame) -> pd.DataFrame:
 
     return result
 
+def normalize_employee_masks(
+    df: pd.DataFrame,
+) -> pd.DataFrame:
+    """
+    Convert recognized source masking patterns to NULL.
+
+    Do not modify original Bronze values.
+    Do not treat ordinary strings containing 'x' as masked.
+    """
+    result = df.copy()
+
+    # Entirely masked geographical/address fields.
+    for column in EMPLOYEE_FULL_MASK_COLUMNS:
+        if column not in result.columns:
+            continue
+
+        values = result[column].astype("string")
+
+        masked = values.str.fullmatch(
+            r"[Xx]+",
+            na=False,
+        )
+
+        result[column] = values.mask(masked)
+
+    # Phone numbers containing X placeholders are incomplete.
+    # Keep all other values as strings.
+    for column in EMPLOYEE_PHONE_COLUMNS:
+        if column not in result.columns:
+            continue
+
+        values = result[column].astype("string")
+
+        masked = values.str.contains(
+            r"[Xx]",
+            regex=True,
+            na=False,
+        )
+
+        result[column] = values.mask(masked)
+
+    return result
 
 def convert_dates(
     df: pd.DataFrame,
@@ -106,27 +149,28 @@ def transform_employees(
     df: pd.DataFrame,
 ) -> pd.DataFrame:
     """
-    Clean employee records and apply the Silver schema.
+    Clean employee records while preserving all
+    approved business attributes and source lineage.
     """
     result = normalize_missing_values(df)
 
-    # Exclude documented, unusable source columns.
-    result = result.drop(
-        columns=EMPLOYEE_DROP_COLUMNS
-    )
+    # Normalize recognized masking patterns.
+    result = normalize_employee_masks(result)
 
+    # Apply employee date types.
     result = convert_dates(
         result,
         EMPLOYEE_DATE_COLUMNS,
     )
 
+    # Apply nullable numeric types.
     result = convert_numeric(
         result,
         EMPLOYEE_NUMERIC_COLUMNS,
     )
 
-    # Employee IDs remain strings.
-    # Never convert them to numeric values.
+    # Employee IDs, ZIP codes, phone numbers, and
+    # other identifiers remain strings.
 
     return result
 

@@ -6,8 +6,12 @@ import pandas as pd
 from src.silver.config import (
     BRONZE_ROOT,
     SILVER_ROOT,
-    EMPLOYEE_DROP_COLUMNS,
     TIMESHEET_BUSINESS_COLUMNS,
+)
+
+from src.silver.schema_contract import (
+    SCHEMA_COLUMNS,
+    SCHEMA_VERSION,
 )
 
 EMPLOYEE_KEY = ["client_employee_id"]
@@ -233,16 +237,39 @@ def main():
     # 5. Employee schema
     # -----------------------------------------------
 
-    assert not (
-        set(EMPLOYEE_DROP_COLUMNS)
-        & set(employees.columns)
+    assert employees.columns.tolist() == (
+        SCHEMA_COLUMNS["employees"]
     )
 
-    assert len(employees.columns) == 26
+    assert timesheets.columns.tolist() == (
+        SCHEMA_COLUMNS["timesheets"]
+    )
 
+    assert len(employees.columns) == 38
     assert len(timesheets.columns) == 18
 
-    print("PASS: Silver schema")
+    print("PASS: Silver v2 schema")
+
+    # -----------------------------------------------
+    # 5B. Schema-evolution audit
+    # -----------------------------------------------
+
+    schema_audit = load_parquet(
+        SILVER_ROOT / "audit" / "schema_evolution"
+    )
+
+    assert len(schema_audit) == 11
+
+    assert schema_audit["schema_version"].eq(
+        SCHEMA_VERSION
+    ).all()
+
+    assert int(schema_audit["source_rows"].sum()) == (
+        len(bronze_employees)
+        + len(bronze_timesheets)
+    )
+
+    print("PASS: Schema evolution audit")
 
     # -----------------------------------------------
     # 6. Data type checks

@@ -52,6 +52,7 @@ DATASETS = [
     "audit/quality_issues",
     "audit/rejected_employees",
     "audit/rejected_timesheets",
+    "audit/schema_evolution",
 ]
 
 EXPECTED_COUNTS = {
@@ -61,6 +62,7 @@ EXPECTED_COUNTS = {
     "audit/quality_issues": 0,
     "audit/rejected_employees": 0,
     "audit/rejected_timesheets": 0,
+    "audit/schema_evolution": 11,
 }
 
 
@@ -180,6 +182,9 @@ def sql_types(df, dataset):
         mapping["scheduled_weekly_hour"] = Numeric(
             12, 2
         )
+        mapping["years_of_experience"] = Numeric(
+            12, 2
+        )
 
     else:
         mapping["punch_apply_date"] = Date()
@@ -193,6 +198,7 @@ def sql_types(df, dataset):
             mapping[col] = DateTime(timezone=False)
 
         mapping["hours_worked"] = Numeric(12, 2)
+        mapping["years_of_experience"] = Numeric(12, 2)
 
     return mapping
 

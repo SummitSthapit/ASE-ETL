@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 from minio import Minio
 from sqlalchemy import create_engine, text
 
+from src.silver.schema_contract import SCHEMA_VERSION
+
 
 ROOT = Path(__file__).resolve().parents[1]
 load_dotenv(ROOT / ".env")
@@ -35,6 +37,7 @@ EXPECTED_COUNTS = {
     "audit/quality_issues": 0,
     "audit/rejected_employees": 0,
     "audit/rejected_timesheets": 0,
+    "audit/schema_evolution": 11,
 }
 
 
@@ -45,6 +48,7 @@ def get_publication():
                 SELECT
                     snapshot_fingerprint,
                     minio_prefix,
+                    schema_version,
                     employee_count,
                     timesheet_count
                 FROM silver._publication_registry
@@ -79,15 +83,18 @@ def test_publication_consistency():
     print("\nPUBLICATION CONSISTENCY")
 
     publication = get_publication()
+    assert publication["schema_version"] == SCHEMA_VERSION
 
     prefix = publication["minio_prefix"]
     fingerprint = publication["snapshot_fingerprint"]
 
     manifest = get_manifest(prefix)
+    assert manifest["schema_version"] == SCHEMA_VERSION
 
     assert prefix == f"runs/{fingerprint}"
 
     assert manifest["snapshot_fingerprint"] == fingerprint
+    assert manifest["schema_version"] == SCHEMA_VERSION
     assert manifest["prefix"] == prefix
     assert manifest["counts"] == EXPECTED_COUNTS
 

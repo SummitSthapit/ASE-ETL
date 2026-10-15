@@ -1,4 +1,5 @@
 
+from importlib.resources import path
 from pathlib import Path
 import shutil
 import tempfile
@@ -21,6 +22,21 @@ from src.silver.validation import (
 from src.silver.deduplication import (
     deduplicate_timesheets,
 )
+from src.silver.schema_contract import align_source_schema
+
+from src.silver.schema_audit import (
+    make_schema_audit_record,
+    build_schema_audit,
+)
+
+from src.silver.schema_contract import (
+    align_source_schema,
+    SchemaDriftError,
+)
+
+from src.silver.schema_failures import (
+    record_schema_failure,
+)
 
 
 LINEAGE_KEY = [
@@ -36,7 +52,21 @@ TIMESHEET_PRIMARY_KEY = [
 ]
 
 
-def load_bronze(pattern: str) -> pd.DataFrame:
+
+
+def load_bronze(
+    pattern: str,
+    dataset: str,
+    return_audit: bool = False,
+):
+    """
+    Read and validate each Bronze Parquet part.
+
+    By default, return only the combined DataFrame.
+
+    When return_audit=True, also return a structured
+    schema-audit DataFrame.
+    """
     files = sorted(BRONZE_ROOT.glob(pattern))
 
     if not files:
@@ -44,10 +74,59 @@ def load_bronze(pattern: str) -> pd.DataFrame:
             f"No Bronze files found for: {pattern}"
         )
 
-    frames = [
-        pd.read_parquet(path)
-        for path in files
-    ]
+    frames = []
+    audit_records = []
+
+    for path in files:
+        raw = pd.read_parquet(path)
+
+        try:
+            relative_source = path.relative_to(
+                BRONZE_ROOT
+            ).as_posix()
+
+            aligned, report = align_source_schema(
+                df=raw,
+                dataset=dataset,
+                source_name=relative_source,
+            )
+
+        except SchemaDriftError as exc:
+            diagnostic_path = record_schema_failure(
+                dataset=dataset,
+                source_name=relative_source,
+                error=exc,
+            )
+
+            print(
+                f"SCHEMA REJECTED: {path}"
+            )
+            print(
+                f"Diagnostic saved: {diagnostic_path}"
+            )
+
+            raise
+
+        audit_records.append(
+            make_schema_audit_record(
+                report=report,
+                source_rows=len(raw),
+            )
+        )
+
+        if report.missing_optional_columns:
+            print(
+                f"SCHEMA WARNING: {path} "
+                f"missing optional columns: "
+                f"{report.missing_optional_columns}"
+            )
+        else:
+            print(
+                f"SCHEMA PASS: {path.parent.name} "
+                f"({len(aligned):,} rows)"
+            )
+
+        frames.append(aligned)
 
     result = pd.concat(
         frames,
@@ -59,7 +138,14 @@ def load_bronze(pattern: str) -> pd.DataFrame:
             "Duplicate source lineage detected in Bronze."
         )
 
+    if return_audit:
+        return result, build_schema_audit(
+            audit_records
+        )
+
     return result
+
+
 
 
 def split_critical_records(
@@ -159,17 +245,36 @@ def main():
     # 1. Load Bronze
     # ----------------------------------------------
 
-    employees_raw = load_bronze(
-        "employee_*/*.parquet"
+    # Load each dataset and collect its schema-audit records.
+    employees_raw, employee_schema_audit = load_bronze(
+        "employee_*/*.parquet",
+        dataset="employees",
+        return_audit=True,
     )
 
-    timesheets_raw = load_bronze(
-        "timesheet_*/*.parquet"
+    timesheets_raw, timesheet_schema_audit = load_bronze(
+        "timesheet_*/*.parquet",
+        dataset="timesheets",
+        return_audit=True,
     )
+
+    # Combine the schema audits.
+    schema_audit = pd.concat(
+        [
+            employee_schema_audit,
+            timesheet_schema_audit,
+        ],
+        ignore_index=True,
+    )
+
 
     print("\nBRONZE INPUT")
     print("Employees:", len(employees_raw))
     print("Timesheets:", len(timesheets_raw))
+
+    print("\nSCHEMA AUDIT")
+    print(schema_audit)
+
 
     # ----------------------------------------------
     # 2. Transform
@@ -300,6 +405,7 @@ def main():
             "audit/quality_issues": quality_issues,
             "audit/rejected_employees": employees_rejected,
             "audit/rejected_timesheets": timesheets_rejected,
+            "audit/schema_evolution": schema_audit,
         }
 
         for name, frame in outputs.items():
@@ -347,6 +453,25 @@ def main():
     print("Employee rejects:", len(employees_rejected))
     print("Timesheet rejects:", len(timesheets_rejected))
     print("Quality issues:", len(quality_issues))
+
+    print("\nSCHEMA EVOLUTION")
+
+    print("Schema version: 2.0")
+    print("Bronze Parquet parts checked:", len(schema_audit))
+
+    print(
+        "Exact schema matches:",
+        int(schema_audit["schema_status"].eq("PASS").sum()),
+    )
+
+    print(
+        "Optional schema alignments:",
+        int(
+            schema_audit["schema_status"]
+            .eq("ALIGNED_OPTIONAL")
+            .sum()
+        ),
+    )
 
     print("\nRECONCILIATION PASSED")
     print("SILVER PIPELINE COMPLETED")
