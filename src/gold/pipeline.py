@@ -101,6 +101,83 @@ def verify_silver_publication(connection):
 
     return publication
 
+def publication_is_current(connection, silver_fingerprint):
+    """
+    Check whether Gold is already published for the
+    active Silver snapshot and Gold model version.
+
+    Validate existing Gold data before allowing a skip.
+    """
+
+    registry = connection.execute(
+        text("""
+            SELECT *
+            FROM gold._publication_registry
+            WHERE publication_id = 1
+        """)
+    ).mappings().one_or_none()
+
+    if registry is None:
+        return False
+
+    same_source = (
+        registry["silver_snapshot_fingerprint"]
+        == silver_fingerprint
+    )
+
+    same_model = (
+        registry["gold_model_version"]
+        == GOLD_MODEL_VERSION
+    )
+
+    if not (same_source and same_model):
+        return False
+
+    if registry["publication_status"] != "PUBLISHED":
+        return False
+
+    if not (
+        registry["gold_snapshot_fingerprint"]
+        and registry["minio_prefix"]
+        and registry["published_at"]
+    ):
+        raise RuntimeError(
+            "Gold publication is marked PUBLISHED "
+            "but its metadata is incomplete."
+        )
+
+    # Check the current Gold records before skipping.
+    validate_gold_constraints(connection)
+    validate_gold_data(connection)
+    validate_employee_profiles(connection)
+    validate_dim_date(connection)
+
+    expected_counts = {
+        "dim_employee": registry["employee_count"],
+        "dim_date": registry["date_count"],
+        "fact_timesheet": registry["timesheet_count"],
+    }
+
+    for table, expected in expected_counts.items():
+        actual = connection.execute(
+            text(f"SELECT COUNT(*) FROM gold.{table}")
+        ).scalar_one()
+
+        if actual != expected:
+            raise ValueError(
+                f"{table}: published count mismatch. "
+                f"Expected {expected}, found {actual}"
+            )
+
+    print(
+        "\nGold already published for this "
+        "Silver snapshot and model version."
+    )
+    print("Existing Gold data validated.")
+    print("Skipping unnecessary reload.")
+
+    return True
+
 def run_gold_pipeline():
     """
     Synchronize PostgreSQL Gold with the active Silver
@@ -141,6 +218,14 @@ def run_gold_pipeline():
         ensure_dim_date(connection)
         ensure_fact_timesheet(connection)
         ensure_gold_registry(connection)
+
+        # Skip unchanged, already-published Gold snapshots.
+        # This check runs after both advisory locks are held.
+        if publication_is_current(
+            connection,
+            publication["snapshot_fingerprint"],
+        ):
+            return
 
         # 5. Load dimensions.
         print("\nLOADING DIMENSIONS")
