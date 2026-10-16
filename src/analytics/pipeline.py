@@ -975,6 +975,11 @@ def main():
             "13_workforce_analytics.sql",
         )
 
+        execute_sql_file(
+            connection,
+            "14_performance_indexes.sql",
+        )
+
         print("\nVERIFYING CLASSIFICATION INVENTORY")
 
         verify_classification_inventory(connection)

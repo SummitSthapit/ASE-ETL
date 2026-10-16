@@ -73,6 +73,10 @@ metrics AS (
 
         (
             m.reporting_date = m.calendar_month_end
+            AND m.month_start >= (
+                SELECT MIN(full_date)
+                FROM gold.dim_date
+            )
         ) AS is_complete_calendar_month,
 
         COUNT(*) FILTER (
