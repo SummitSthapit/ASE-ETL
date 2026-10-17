@@ -1,25 +1,32 @@
+
 """ASE-ETL REST API application."""
+
+from typing import Annotated
 
 from fastapi import Depends, FastAPI
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from src.api.database import get_db
+from src.api.dependencies import require_admin
+from src.api.routers.auth import router as auth_router
 
 
 app = FastAPI(
     title="ASE-ETL API",
     description=(
-        "REST API for employee management "
+        "Secure employee management "
         "and read-only timesheet access."
     ),
     version="1.0.0",
 )
 
+app.include_router(auth_router)
+
 
 @app.get("/health", tags=["Health"])
 def health_check():
-    """Verify the API application is running."""
+    """Basic application liveness check."""
 
     return {
         "status": "healthy",
@@ -27,11 +34,15 @@ def health_check():
     }
 
 
-@app.get("/health/db", tags=["Health"])
+@app.get(
+    "/health/db",
+    tags=["Health"],
+)
 def database_health(
-    db: Session = Depends(get_db),
+    db: Annotated[Session, Depends(get_db)],
+    _admin: Annotated[dict, Depends(require_admin)],
 ):
-    """Verify PostgreSQL database connectivity."""
+    """Admin-only database connectivity check."""
 
     db.execute(text("SELECT 1"))
 
