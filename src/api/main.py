@@ -11,6 +11,8 @@ from src.api.database import get_db
 from src.api.dependencies import require_admin
 from src.api.routers.auth import router as auth_router
 
+from src.api.routers.employees import router as employees_router
+from src.api.routers.timesheets import router as timesheets_router
 
 app = FastAPI(
     title="ASE-ETL API",
@@ -22,6 +24,8 @@ app = FastAPI(
 )
 
 app.include_router(auth_router)
+app.include_router(employees_router)
+app.include_router(timesheets_router)
 
 
 @app.get("/health", tags=["Health"])

@@ -53,6 +53,7 @@ DATASETS = [
     "audit/rejected_employees",
     "audit/rejected_timesheets",
     "audit/schema_evolution",
+    "audit/api_employee_overrides",
 ]
 
 EXPECTED_COUNTS = {
@@ -80,23 +81,42 @@ def dataset_files(name):
 
 
 def verify_local():
-    counts = {}
+    """Verify the original Silver contracts plus a pinned API profile delta."""
+    from src.api.employee_sync_stage import (
+        AUDIT_DATASET,
+        validate_employee_override_snapshot,
+    )
 
+    counts = {}
     for name in DATASETS:
         files = dataset_files(name)
+        counts[name] = sum(pq.read_metadata(file).num_rows for file in files)
+        expected = EXPECTED_COUNTS.get(name)
+        # API-modified employee count and its audit count are dynamic.
+        # All original Bronze-derived datasets keep their exact checks.
+        if name not in ('employees', AUDIT_DATASET):
+            if expected is None or counts[name] != expected:
+                raise ValueError(
+                    f'{name}: expected {expected}, found {counts[name]}'
+                )
 
-        counts[name] = sum(
-            pq.read_metadata(file).num_rows
-            for file in files
-        )
-
-        expected = EXPECTED_COUNTS[name]
-
-        if counts[name] != expected:
-            raise ValueError(
-                f"{name}: expected {expected}, "
-                f"found {counts[name]}"
-            )
+    employees = pd.concat(
+        [pd.read_parquet(file) for file in dataset_files('employees')],
+        ignore_index=True,
+    )
+    override_audit = pd.concat(
+        [pd.read_parquet(file) for file in dataset_files(AUDIT_DATASET)],
+        ignore_index=True,
+    )
+    expected_employees = validate_employee_override_snapshot(
+        employees,
+        override_audit,
+        source_employee_count=EXPECTED_COUNTS['employees'],
+    )
+    if counts['employees'] != expected_employees:
+        raise ValueError('Parquet employee count differs from API overlay reconciliation')
+    if counts[AUDIT_DATASET] != len(override_audit):
+        raise ValueError('Parquet API audit count mismatch')
 
     return counts
 

@@ -39,6 +39,9 @@ from src.silver.schema_failures import (
 )
 
 
+from src.api.employee_sync_stage import stage_employee_overlay
+
+
 LINEAGE_KEY = [
     "source_file",
     "source_row_number",
@@ -382,6 +385,20 @@ def main():
     )
 
     # ----------------------------------------------
+    # 7B. Apply a frozen API change-ledger snapshot.
+    # Bronze/source reconciliation above stays unchanged.
+    # ----------------------------------------------
+    employees_clean, employee_overrides_audit = stage_employee_overlay(
+        employees_clean,
+        expected_source_count=50,
+    )
+    validate_primary_key(
+        employees_clean,
+        ["client_employee_id"],
+        "employees_with_api_overrides",
+    )
+
+    # ----------------------------------------------
     # 8. Write staged outputs
     # ----------------------------------------------
 
@@ -400,6 +417,7 @@ def main():
     try:
         outputs = {
             "employees": employees_clean,
+            "audit/api_employee_overrides": employee_overrides_audit,
             "timesheets": timesheets_clean,
             "audit/duplicate_records": duplicate_audit,
             "audit/quality_issues": quality_issues,
