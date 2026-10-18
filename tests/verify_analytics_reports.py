@@ -1,6 +1,7 @@
 
 """Verify the newest analytics CSV export."""
 
+import argparse
 import csv
 import hashlib
 import json
@@ -21,16 +22,22 @@ def sha256_file(path):
 
 
 def main():
-    runs = sorted(
-        path for path in OUTPUT_ROOT.iterdir()
-        if path.is_dir()
-        and not path.name.startswith(".staging_")
-    )
-
-    if not runs:
-        raise RuntimeError("No report export directories found.")
-
-    latest = runs[-1]
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--directory", type=Path, default=None)
+    args = parser.parse_args()
+    if args.directory is not None:
+        latest = args.directory.resolve()
+        if latest.parent != OUTPUT_ROOT.resolve():
+            raise ValueError("Report directory must be a direct child of the analytics output root")
+    else:
+        runs = sorted(
+            path for path in OUTPUT_ROOT.iterdir()
+            if path.is_dir()
+            and not path.name.startswith(".staging_")
+        )
+        if not runs:
+            raise RuntimeError("No report export directories found.")
+        latest = runs[-1]
 
     manifest = json.loads(
         (latest / "manifest.json").read_text(
