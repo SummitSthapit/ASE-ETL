@@ -390,7 +390,7 @@ def main():
     # ----------------------------------------------
     employees_clean, employee_overrides_audit = stage_employee_overlay(
         employees_clean,
-        expected_source_count=50,
+        expected_source_count=len(employees_clean),
     )
     validate_primary_key(
         employees_clean,

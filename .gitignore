@@ -25,11 +25,22 @@ Thumbs.db
 data/bronze/
 data/silver/
 data/gold/exports/
+data/orchestration
 
 # Temporary integration patch backups
 *.pre_7_7_2
 
 # Python test artifacts
 .pytest_cache/
+__pycache__/
+*.pyc
+
+# Temporary source-code backups
+*.bak
+*.phase8backup
+*.pre_*
+*.py.bak
+
+# Python cache
 __pycache__/
 *.pyc

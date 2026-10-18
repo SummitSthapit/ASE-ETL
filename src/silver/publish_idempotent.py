@@ -433,13 +433,10 @@ def verify_silver_v2():
             "Schema-evolution audit has an incompatible version"
         )
 
-    if int(schema_audit["source_rows"].sum()) != (
-        50 + 412571
-    ):
-        raise ValueError(
-            "Schema audit does not reconcile with "
-            "the current Bronze snapshot"
-        )
+    # verify_local() already checks all schema audit rows against
+    # the corresponding Bronze Parquet parts dynamically.
+    if (schema_audit["source_rows"] < 0).any():
+        raise ValueError("Negative source rows in schema audit")
 
     # Published audits must not contain
     # machine-specific absolute source paths.

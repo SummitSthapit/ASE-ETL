@@ -65,11 +65,29 @@ def main():
         "8082",
     ]
 
-    result = subprocess.run(
-        command,
-        cwd=PROJECT_ROOT,
-        check=False,
-    )
+    # Coordinate runs launched through this entry point. PostgreSQL
+    # session advisory lock is held for the entire Luigi subprocess.
+    from sqlalchemy import text
+    from src.silver.publish import ENGINE
+
+    with ENGINE.connect() as lock_conn:
+        locked = lock_conn.execute(
+            text("SELECT pg_try_advisory_lock(7182499)")
+        ).scalar_one()
+        lock_conn.commit()
+        if not locked:
+            raise RuntimeError("An ASE-ETL workflow is already running")
+        try:
+            result = subprocess.run(
+                command,
+                cwd=PROJECT_ROOT,
+                check=False,
+            )
+        finally:
+            lock_conn.execute(
+                text("SELECT pg_advisory_unlock(7182499)")
+            )
+            lock_conn.commit()
 
     if result.returncode != 0:
         raise SystemExit(result.returncode)

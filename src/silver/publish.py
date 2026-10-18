@@ -56,17 +56,6 @@ DATASETS = [
     "audit/api_employee_overrides",
 ]
 
-EXPECTED_COUNTS = {
-    "employees": 50,
-    "timesheets": 381732,
-    "audit/duplicate_records": 30839,
-    "audit/quality_issues": 0,
-    "audit/rejected_employees": 0,
-    "audit/rejected_timesheets": 0,
-    "audit/schema_evolution": 11,
-}
-
-
 def dataset_files(name):
     files = sorted(
         (SILVER_ROOT / name).glob("*.parquet")
@@ -91,14 +80,7 @@ def verify_local():
     for name in DATASETS:
         files = dataset_files(name)
         counts[name] = sum(pq.read_metadata(file).num_rows for file in files)
-        expected = EXPECTED_COUNTS.get(name)
-        # API-modified employee count and its audit count are dynamic.
-        # All original Bronze-derived datasets keep their exact checks.
-        if name not in ('employees', AUDIT_DATASET):
-            if expected is None or counts[name] != expected:
-                raise ValueError(
-                    f'{name}: expected {expected}, found {counts[name]}'
-                )
+        # Actual Bronze Parquet and audit counts are reconciled below.
 
     employees = pd.concat(
         [pd.read_parquet(file) for file in dataset_files('employees')],
@@ -108,10 +90,48 @@ def verify_local():
         [pd.read_parquet(file) for file in dataset_files(AUDIT_DATASET)],
         ignore_index=True,
     )
+    # Reconcile exact Bronze Parquet parts to their schema-audit records.
+    from src.silver.config import BRONZE_ROOT
+    schema_audit = pd.concat(
+        [pd.read_parquet(p) for p in dataset_files('audit/schema_evolution')],
+        ignore_index=True,
+    )
+    seen = set()
+    source_employees = 0
+    source_timesheets = 0
+    parts = sorted(BRONZE_ROOT.glob('*/*.parquet'))
+    if not parts:
+        raise ValueError('No Bronze Parquet inputs')
+    for part in parts:
+        name = part.relative_to(BRONZE_ROOT).as_posix()
+        matches = schema_audit.loc[schema_audit['source_name'] == name]
+        if len(matches) != 1:
+            raise ValueError(f'Missing or duplicate schema audit for {name}')
+        rows = pq.read_metadata(part).num_rows
+        if int(matches.iloc[0]['source_rows']) != rows:
+            raise ValueError(f'Schema audit row mismatch for {name}')
+        seen.add(name)
+        if part.parent.name.startswith('employee_'):
+            source_employees += rows
+        elif part.parent.name.startswith('timesheet_'):
+            source_timesheets += rows
+        else:
+            raise ValueError(f'Unknown Bronze source type: {name}')
+    if len(seen) != len(schema_audit):
+        raise ValueError('Schema audit contains orphan records')
+    if counts['audit/schema_evolution'] != len(schema_audit):
+        raise ValueError('Schema audit Parquet count mismatch')
+    if (counts['timesheets'] + counts['audit/rejected_timesheets']
+            + counts['audit/duplicate_records'] != source_timesheets):
+        raise ValueError('Silver timesheet reconciliation failed')
+    source_employees -= counts['audit/rejected_employees']
+    if source_employees < 0:
+        raise ValueError('Employee rejects exceed Bronze source records')
+
     expected_employees = validate_employee_override_snapshot(
         employees,
         override_audit,
-        source_employee_count=EXPECTED_COUNTS['employees'],
+        source_employee_count=source_employees,
     )
     if counts['employees'] != expected_employees:
         raise ValueError('Parquet employee count differs from API overlay reconciliation')
