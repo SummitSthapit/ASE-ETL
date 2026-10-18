@@ -20,3 +20,16 @@ Thumbs.db
 
 # Generated analytics exports
 /reports/analytics/
+
+# Generated ETL data
+data/bronze/
+data/silver/
+data/gold/exports/
+
+# Temporary integration patch backups
+*.pre_7_7_2
+
+# Python test artifacts
+.pytest_cache/
+__pycache__/
+*.pyc

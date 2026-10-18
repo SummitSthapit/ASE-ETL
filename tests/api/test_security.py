@@ -9,6 +9,8 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import text
 
+from pwdlib import PasswordHash
+
 from src.api.database import engine
 from src.api.main import app
 from src.api.security import (
@@ -22,6 +24,102 @@ from src.api.security import (
 
 client = TestClient(app)
 
+@pytest.fixture(scope="module", autouse=True)
+def security_test_users():
+    """Create isolated users for security tests, then remove them."""
+
+    usernames = (
+        "security_viewer_fixture",
+        "security_admin_fixture",
+    )
+
+    with engine.begin() as connection:
+        database = connection.execute(
+            text("SELECT current_database()")
+        ).scalar_one()
+
+        if database != "ase_etl_test":
+            raise RuntimeError(
+                f"REFUSING TEST WRITES TO {database!r}"
+            )
+
+        existing = connection.execute(
+            text("""
+                SELECT username
+                FROM api.users
+                WHERE username IN (:viewer, :admin)
+            """),
+            {
+                "viewer": usernames[0],
+                "admin": usernames[1],
+            },
+        ).scalars().all()
+
+        if existing:
+            raise RuntimeError(
+                f"Security fixture usernames already exist: {existing}"
+            )
+
+        password_hash = PasswordHash.recommended().hash(
+            "UnusedSecurityTestPassword_Only!"
+        )
+
+        created_ids = []
+
+        for username, role in (
+            (usernames[0], "viewer"),
+            (usernames[1], "admin"),
+        ):
+            user_id = connection.execute(
+                text("""
+                    INSERT INTO api.users (
+                        username,
+                        hashed_password,
+                        role,
+                        is_active,
+                        token_version
+                    )
+                    VALUES (
+                        :username,
+                        :hashed_password,
+                        :role,
+                        TRUE,
+                        0
+                    )
+                    RETURNING user_id
+                """),
+                {
+                    "username": username,
+                    "hashed_password": password_hash,
+                    "role": role,
+                },
+            ).scalar_one()
+
+            created_ids.append(user_id)
+
+    try:
+        yield
+    finally:
+        with engine.begin() as connection:
+            database = connection.execute(
+                text("SELECT current_database()")
+            ).scalar_one()
+
+            if database != "ase_etl_test":
+                raise RuntimeError(
+                    "Test database changed before cleanup"
+                )
+
+            connection.execute(
+                text("""
+                    DELETE FROM api.users
+                    WHERE user_id IN (:viewer_id, :admin_id)
+                """),
+                {
+                    "viewer_id": created_ids[0],
+                    "admin_id": created_ids[1],
+                },
+            )
 
 def get_test_user(username):
     with engine.connect() as connection:
@@ -82,7 +180,7 @@ def test_malformed_token_rejected():
 
 
 def test_forged_signature_rejected():
-    user = get_test_user("viewer_test")
+    user = get_test_user("security_viewer_fixture")
 
     token = jwt.encode(
         {
@@ -110,7 +208,7 @@ def test_forged_signature_rejected():
 
 
 def test_expired_token_rejected():
-    user = get_test_user("viewer_test")
+    user = get_test_user("security_viewer_fixture")
     now = datetime.now(timezone.utc)
 
     token = signed_token(
@@ -129,7 +227,7 @@ def test_expired_token_rejected():
 
 
 def test_wrong_audience_rejected():
-    user = get_test_user("viewer_test")
+    user = get_test_user("security_viewer_fixture")
 
     token = signed_token(
         user,
@@ -145,7 +243,7 @@ def test_wrong_audience_rejected():
 
 
 def test_wrong_token_version_rejected():
-    user = get_test_user("viewer_test")
+    user = get_test_user("security_viewer_fixture")
 
     token = signed_token(
         user,
@@ -161,7 +259,7 @@ def test_wrong_token_version_rejected():
 
 
 def test_viewer_can_read_own_profile():
-    user = get_test_user("viewer_test")
+    user = get_test_user("security_viewer_fixture")
 
     token = create_access_token(
         user["user_id"],
@@ -179,7 +277,7 @@ def test_viewer_can_read_own_profile():
 
 
 def test_viewer_cannot_access_admin():
-    user = get_test_user("viewer_test")
+    user = get_test_user("security_viewer_fixture")
 
     token = create_access_token(
         user["user_id"],
@@ -195,7 +293,7 @@ def test_viewer_cannot_access_admin():
 
 
 def test_admin_can_access_admin():
-    user = get_test_user("admin")
+    user = get_test_user("security_admin_fixture")
 
     token = create_access_token(
         user["user_id"],
@@ -217,7 +315,7 @@ def test_database_health_requires_authentication():
 
 
 def test_database_health_denies_viewer():
-    user = get_test_user("viewer_test")
+    user = get_test_user("security_viewer_fixture")
 
     token = create_access_token(
         user["user_id"],
