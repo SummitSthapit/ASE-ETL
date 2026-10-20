@@ -2,7 +2,7 @@
 
 **Assignment:** Data Engineering Assignment 1 — *ETL to Insights*  
 **Project:** ASE-ETL  
-**Repository:** https://github.com/SummitSthapit/ASE-ETL  
+**Repository:** https://github.com/SummitSthapit/workforce-analytics-etl
 **Review date:** 19 October 2026  
 **Scope:** Implemented pipeline, supported engineering decisions, test evidence, and known limitations
 
