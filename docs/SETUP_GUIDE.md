@@ -13,7 +13,7 @@
 
 ```powershell
 # Example location; choose your own folder if needed.
-git clone https://github.com/SummitSthapit/ASE-ETL.git
+git clone https://github.com/SummitSthapit/workforce-analytics-etl
 cd ASE-ETL
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
