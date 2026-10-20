@@ -1,4 +1,4 @@
-# ASE-ETL — ETL to Insights
+# Workforce-Analytics — ETL to Insights
 
 A reproducible **employee and timesheet data engineering pipeline** built with **Python, pandas, PostgreSQL, MinIO, Parquet, Luigi, SQL, FastAPI and Power BI**. The project transforms overlapping raw exports into quality-controlled relational tables, analytical data marts, report CSVs and interactive workforce visualizations.
 
