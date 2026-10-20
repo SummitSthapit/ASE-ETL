@@ -61,6 +61,19 @@ Browse [Swagger UI](http://127.0.0.1:8000/docs). `admin` users can manage employ
 
 Open `powerbi/ASE_Workforce_Intelligence.pbix` in Power BI Desktop. The file uses a **fixed verified October 18 reporting snapshot**; it does not automatically switch to a later pipeline run. Follow the usage guide before changing Power Query paths.
 
+
+## Power BI Dashboard
+
+The Power BI report contains three interactive pages:
+
+- Workforce Overview
+- Retention & Workforce Stability
+- Attendance & Workload
+
+![Retention and Workforce Stability](docs/images/overview1.png)
+![Workforce Overeview](docs/images/overview2.png)
+![Attendance and Workload](docs/images/overview3.png)
+
 ## Documentation
 
 - **[Engineering report](docs/ASE_ETL_Final_Engineering_Report.md)** — architecture, Phases 1–9, engineering decisions, redesigns, trade-offs, open boundaries and assessment.
@@ -68,10 +81,9 @@ Open `powerbi/ASE_Workforce_Intelligence.pbix` in Power BI Desktop. The file use
 - **[Usage guide](docs/USAGE_GUIDE.md)** — normal/rerun commands, safe recovery, FastAPI roles, report exports and Power BI.
 - **[Schema guide](docs/DATABASE_SCHEMA.md)** — Mermaid ER diagram, fields, primary/foreign keys, registries and SQL KPI map.
 - **[Verification register](docs/FINAL_VERIFICATION.md)** — final observed commands, outputs and test evidence scope.
-- **`docs/ASE_ETL_Phase_*`** — detailed original implementation reports, including the revised Silver v2 report.
+- **[Phase implementation reports](docs/phases/)** — detailed Phase 1–9 reports, including the original and revised Silver implementations.
 
 ## Security and scope
 
 Never commit `.env`, access tokens, personal CSV exports, generated report folders or sensitive employee data. Inspect `git status` and staged changes before pushing. All published metrics are educational/assignment analytics: employee HR coverage is sparse, overtime is a schedule/punch **proxy**, and unknown pay codes are not assumed to mean worked time.
 
-**Source assignment:** *Data Engineering Assignment 1 — ETL to Insights*; see the engineering report for traceability and evidence details.
